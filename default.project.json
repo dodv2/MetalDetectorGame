@@ -1,0 +1,132 @@
+{
+  "name": "BeachDetectingSimulator",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "Shared": {
+        "$path": "src/shared"
+      },
+      "Remotes": {
+        "$path": "src/Remotes.model.json"
+      }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "Main": {
+        "$path": "src/server/Main.server.lua"
+      },
+      "Services": {
+        "$path": "src/server/Services"
+      },
+      "Util": {
+        "$path": "src/server/Util"
+      }
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "$properties": {
+        "CharacterWalkSpeed": 22,
+        "CameraMaxZoomDistance": 60
+      },
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "ClientMain": {
+          "$path": "src/client/ClientMain.client.lua"
+        },
+        "Controllers": {
+          "$path": "src/client/Controllers"
+        },
+        "UI": {
+          "$path": "src/client/UI"
+        }
+      }
+    },
+    "Workspace": {
+      "$className": "Workspace",
+      "Map": {
+        "$path": "map/Map.rbxmx"
+      }
+    },
+    "Lighting": {
+      "$className": "Lighting",
+      "$properties": {
+        "ClockTime": 14.2,
+        "Brightness": 2.4,
+        "Ambient": [
+          0.36,
+          0.36,
+          0.4
+        ],
+        "OutdoorAmbient": [
+          0.55,
+          0.55,
+          0.6
+        ],
+        "EnvironmentDiffuseScale": 1,
+        "EnvironmentSpecularScale": 1,
+        "GlobalShadows": true,
+        "Technology": "Future",
+        "ShadowSoftness": 0.18,
+        "ExposureCompensation": 0.1
+      },
+      "Atmosphere": {
+        "$className": "Atmosphere",
+        "$properties": {
+          "Density": 0.28,
+          "Offset": 0.2,
+          "Haze": 1.2,
+          "Glare": 0.4,
+          "Color": [
+            0.78,
+            0.88,
+            0.95
+          ],
+          "Decay": [
+            0.55,
+            0.7,
+            0.85
+          ]
+        }
+      },
+      "ColorCorrection": {
+        "$className": "ColorCorrectionEffect",
+        "$properties": {
+          "Saturation": 0.12,
+          "Contrast": 0.05,
+          "Brightness": 0.02
+        }
+      },
+      "Bloom": {
+        "$className": "BloomEffect",
+        "$properties": {
+          "Intensity": 0.5,
+          "Size": 26,
+          "Threshold": 1.8
+        }
+      },
+      "SunRays": {
+        "$className": "SunRaysEffect",
+        "$properties": {
+          "Intensity": 0.08,
+          "Spread": 0.6
+        }
+      },
+      "Sky": {
+        "$className": "Sky",
+        "$properties": {
+          "SunAngularSize": 16,
+          "MoonAngularSize": 10,
+          "StarCount": 3000,
+          "CelestialBodiesShown": true
+        }
+      }
+    },
+    "Players": {
+      "$className": "Players",
+      "$properties": {
+        "RespawnTime": 3
+      }
+    }
+  }
+}

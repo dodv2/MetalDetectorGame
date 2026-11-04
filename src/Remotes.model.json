@@ -1,0 +1,125 @@
+{
+  "className": "Folder",
+  "children": [
+    {
+      "name": "StateUpdate",
+      "className": "RemoteEvent"
+    },
+    {
+      "name": "Notify",
+      "className": "RemoteEvent"
+    },
+    {
+      "name": "DetectorSignal",
+      "className": "RemoteEvent"
+    },
+    {
+      "name": "TreasureFound",
+      "className": "RemoteEvent"
+    },
+    {
+      "name": "LevelUp",
+      "className": "RemoteEvent"
+    },
+    {
+      "name": "Announcement",
+      "className": "RemoteEvent"
+    },
+    {
+      "name": "Purchased",
+      "className": "RemoteEvent"
+    },
+    {
+      "name": "DigProgress",
+      "className": "RemoteEvent"
+    },
+    {
+      "name": "DigClick",
+      "className": "RemoteEvent"
+    },
+    {
+      "name": "GetState",
+      "className": "RemoteFunction"
+    },
+    {
+      "name": "UpdateSettings",
+      "className": "RemoteFunction"
+    },
+    {
+      "name": "Dig",
+      "className": "RemoteFunction"
+    },
+    {
+      "name": "SellItem",
+      "className": "RemoteFunction"
+    },
+    {
+      "name": "SellBulk",
+      "className": "RemoteFunction"
+    },
+    {
+      "name": "ToggleLock",
+      "className": "RemoteFunction"
+    },
+    {
+      "name": "DisplayItem",
+      "className": "RemoteFunction"
+    },
+    {
+      "name": "RemoveDisplay",
+      "className": "RemoteFunction"
+    },
+    {
+      "name": "MoveDisplay",
+      "className": "RemoteFunction"
+    },
+    {
+      "name": "AutoFillShop",
+      "className": "RemoteFunction"
+    },
+    {
+      "name": "ExpandShop",
+      "className": "RemoteFunction"
+    },
+    {
+      "name": "SetShopName",
+      "className": "RemoteFunction"
+    },
+    {
+      "name": "BuyItem",
+      "className": "RemoteFunction"
+    },
+    {
+      "name": "EquipItem",
+      "className": "RemoteFunction"
+    },
+    {
+      "name": "BuyBoost",
+      "className": "RemoteFunction"
+    },
+    {
+      "name": "UnlockZone",
+      "className": "RemoteFunction"
+    },
+    {
+      "name": "TravelTo",
+      "className": "RemoteFunction"
+    },
+    {
+      "name": "ClaimQuest",
+      "className": "RemoteFunction"
+    },
+    {
+      "name": "ShopTheme",
+      "className": "RemoteFunction"
+    },
+    {
+      "name": "SharkBite",
+      "className": "RemoteEvent"
+    },
+    {
+      "name": "DevCommand",
+      "className": "RemoteFunction"
+    }
+  ]
+}
