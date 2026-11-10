@@ -37,6 +37,9 @@ screenGui.Name = "BeachUI"
 screenGui.ResetOnSpawn = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.IgnoreGuiInset = false
+-- tappable UI stays clear of notches, the top bar and system bars (vault: Safe Areas and Insets)
+screenGui.ScreenInsets = Enum.ScreenInsets.CoreUISafeInsets
+screenGui.SafeAreaCompatibility = Enum.SafeAreaCompatibility.None
 screenGui.Parent = player:WaitForChild("PlayerGui")
 UIKit.Screen = screenGui
 
@@ -132,19 +135,30 @@ function UIKit.Round(): UICorner
 end
 
 function UIKit.Stroke(color: Color3?, thickness: number?, transparency: number?): UIStroke
+	local c = color or Theme.Colors.Stroke
+	local t = transparency or 0
+	-- Ink and Candy: ink outlines are solid and a little thicker
+	if c == Theme.Colors.Stroke or c == Color3.new(0, 0, 0) then
+		c = Theme.Colors.Ink
+		t = math.min(t, 0.1)
+		thickness = math.max(thickness or 3, 2.5)
+	end
 	return UIKit.new("UIStroke", {
-		Color = color or Theme.Colors.Stroke,
-		Thickness = thickness or 2,
-		Transparency = transparency or 0.6,
+		Color = c,
+		Thickness = thickness or 3,
+		Transparency = t,
+		LineJoinMode = Enum.LineJoinMode.Round,
 		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 	})
 end
 
-function UIKit.TextStroke(transparency: number?): UIStroke
+-- Ink outline on text (about 10% of text size, round joins)
+function UIKit.TextStroke(transparency: number?, thickness: number?): UIStroke
 	return UIKit.new("UIStroke", {
-		Color = Color3.new(0, 0, 0),
-		Thickness = 1.5,
-		Transparency = transparency or 0.5,
+		Color = Theme.Colors.Ink,
+		Thickness = thickness or 2,
+		Transparency = math.min(transparency or 0, 0.2),
+		LineJoinMode = Enum.LineJoinMode.Round,
 		ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
 	})
 end
@@ -211,7 +225,7 @@ function UIKit.ScrollFrame(props: { [any]: any }): ScrollingFrame
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
 		ScrollBarThickness = 6,
-		ScrollBarImageColor3 = Theme.Colors.Stroke,
+		ScrollBarImageColor3 = Theme.Colors.Muted,
 		AutomaticCanvasSize = Enum.AutomaticSize.Y,
 		CanvasSize = UDim2.new(),
 		ScrollingDirection = Enum.ScrollingDirection.Y,
@@ -238,35 +252,72 @@ end
 
 export type Button = TextButton & {}
 
+-- Darker lip colour under a slab face
+local function lipColor(face: Color3): Color3
+	return Theme.Lips[face:ToHex()] or face:Lerp(Theme.Colors.Ink, 0.45)
+end
+
+-- Tactile slab: gradient face, darker lip (inset shadow at the bottom), ink outline, ink text stroke.
+-- Hover grows to 1.04, press sinks to 0.96 (UIScale, never Size).
 function UIKit.Button(text: string, color: Color3?, onClick: (() -> ())?, props: { [any]: any }?): TextButton
 	local base = color or Theme.Colors.Teal
 	local button = UIKit.new("TextButton", {
 		Text = text,
 		Font = Theme.Fonts.Title,
 		TextSize = 18,
-		TextColor3 = UIKit.ContrastText(base),
+		TextColor3 = Color3.new(1, 1, 1),
 		BackgroundColor3 = base,
 		AutoButtonColor = false,
 		Size = UDim2.fromOffset(120, 40),
 		TextWrapped = true,
 	}, {
-		UIKit.Corner(10),
-		UIKit.Stroke(Color3.new(0, 0, 0), 2, 0.75),
-		UIKit.Gradient(Color3.new(1, 1, 1), Color3.fromRGB(205, 205, 205)),
+		UIKit.Corner(12),
+		UIKit.Stroke(Theme.Colors.Ink, 3, 0),
+		UIKit.TextStroke(0, 2),
 	})
+	local gradient = UIKit.new("UIGradient", { Rotation = 90, Parent = button })
+	local pop = UIKit.new("UIScale", { Name = "Pop", Parent = button })
+	local function paint(face: Color3)
+		local lip = lipColor(face)
+		-- top: lighter face, middle: face, bottom 12%: lip band
+		gradient.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, lighten(face, 0.35)),
+			ColorSequenceKeypoint.new(0.86, face),
+			ColorSequenceKeypoint.new(0.87, lip),
+			ColorSequenceKeypoint.new(1, lip),
+		})
+	end
+	button.BackgroundColor3 = Color3.new(1, 1, 1) -- gradient carries the colour
+	paint(base)
 	button:SetAttribute("BaseColor", base)
+	button:GetAttributeChangedSignal("BaseColor"):Connect(function()
+		paint(button:GetAttribute("BaseColor") :: Color3)
+	end)
 	if props then
 		for key, value in props do
 			(button :: any)[key] = value
 		end
 	end
+	if button.BackgroundColor3 ~= Color3.new(1, 1, 1) then
+		-- a caller passed BackgroundColor3 in props: treat it as the face colour
+		button:SetAttribute("BaseColor", button.BackgroundColor3)
+		button.BackgroundColor3 = Color3.new(1, 1, 1)
+	end
 	button.MouseEnter:Connect(function()
 		if button.Active then
-			UIKit.Tween(button, 0.12, { BackgroundColor3 = lighten(button:GetAttribute("BaseColor") :: Color3, 0.15) })
+			UIKit.Tween(pop, 0.1, { Scale = 1.04 })
 		end
 	end)
 	button.MouseLeave:Connect(function()
-		UIKit.Tween(button, 0.12, { BackgroundColor3 = button:GetAttribute("BaseColor") :: Color3 })
+		UIKit.Tween(pop, 0.1, { Scale = 1 })
+	end)
+	button.MouseButton1Down:Connect(function()
+		if button.Active then
+			UIKit.Tween(pop, 0.05, { Scale = 0.96 })
+		end
+	end)
+	button.MouseButton1Up:Connect(function()
+		UIKit.Tween(pop, 0.16, { Scale = 1 }, Enum.EasingStyle.Back)
 	end)
 	button.Activated:Connect(function()
 		if not button.Active then
@@ -285,8 +336,12 @@ end
 -- Changes a button's colour (keeps hover working)
 function UIKit.SetButtonColor(button: TextButton, color: Color3)
 	button:SetAttribute("BaseColor", color)
-	button.BackgroundColor3 = color
-	button.TextColor3 = UIKit.ContrastText(color)
+	-- plain buttons (built with UIKit.new, no slab gradient) still need a direct colour
+	if not button:FindFirstChildOfClass("UIGradient") then
+		button.BackgroundColor3 = color
+	end
+	-- white text keeps its ink stroke on every slab, except the pale "done" face
+	button.TextColor3 = if color == Theme.Colors.Disabled then Theme.Colors.Muted else Color3.new(1, 1, 1)
 end
 
 function UIKit.SetButtonEnabled(button: TextButton, enabled: boolean, color: Color3?)
@@ -305,7 +360,7 @@ function UIKit.Bar(props: { [any]: any }, fillColor: Color3?): Bar
 		BackgroundColor3 = Theme.Colors.PanelDark,
 		Size = UDim2.new(1, 0, 0, 16),
 		ClipsDescendants = true,
-	}, { UIKit.Round(), UIKit.Stroke(Color3.new(0, 0, 0), 1.5, 0.6) })
+	}, { UIKit.Round(), UIKit.Stroke(Theme.Colors.Ink, 2.5, 0) })
 	for key, value in props do
 		(frame :: any)[key] = value
 	end
@@ -314,7 +369,7 @@ function UIKit.Bar(props: { [any]: any }, fillColor: Color3?): Bar
 		BackgroundColor3 = fillColor or Theme.Colors.Green,
 		Size = UDim2.fromScale(0, 1),
 		Parent = frame,
-	}, { UIKit.Round(), UIKit.Gradient(Color3.new(1, 1, 1), Color3.fromRGB(190, 190, 190)) })
+	}, { UIKit.Round(), UIKit.Gradient(Color3.new(1, 1, 1), Color3.fromRGB(175, 175, 175)) })
 	local label = UIKit.Text({
 		Size = UDim2.fromScale(1, 1),
 		TextXAlignment = Enum.TextXAlignment.Center,
@@ -328,7 +383,7 @@ function UIKit.Bar(props: { [any]: any }, fillColor: Color3?): Bar
 	local bar = { Frame = frame, Fill = fill, Label = label }
 	function bar.Set(self: any, fraction: number, text: string?)
 		local clamped = math.clamp(fraction, 0, 1)
-		UIKit.Tween(self.Fill, 0.25, { Size = UDim2.fromScale(clamped, 1) })
+		UIKit.Tween(self.Fill, 0.35, { Size = UDim2.fromScale(clamped, 1) })
 		if text then
 			self.Label.Text = text
 		end
@@ -444,28 +499,32 @@ function UIKit.Window(name: string, title: string, size: Vector2): Window
 		ZIndex = 10,
 		Parent = screenGui,
 	}, {
-		UIKit.Corner(18),
-		UIKit.Stroke(Theme.Colors.Stroke, 3, 0.45),
-		UIKit.Gradient(Color3.fromRGB(255, 255, 255), Color3.fromRGB(200, 210, 225)),
+		UIKit.Corner(22),
+		UIKit.Stroke(Theme.Colors.Ink, 4, 0),
 	})
 	UIKit.AddScale(frame)
 
+	-- inset header slab in the menu colour (Lagoon), with a darker lip
 	local header = UIKit.new("Frame", {
 		Name = "Header",
-		Size = UDim2.new(1, 0, 0, 52),
-		BackgroundColor3 = Theme.Colors.Teal,
+		Position = UDim2.fromOffset(8, 8),
+		Size = UDim2.new(1, -16, 0, 48),
+		BackgroundColor3 = Color3.new(1, 1, 1),
 		ZIndex = 11,
 		Parent = frame,
-	}, { UIKit.Corner(18), UIKit.Gradient(Color3.fromRGB(255, 255, 255), Color3.fromRGB(170, 200, 210)) })
-	-- square off the header's bottom corners
-	UIKit.new("Frame", {
-		Size = UDim2.new(1, 0, 0, 18),
-		Position = UDim2.new(0, 0, 1, -18),
-		BackgroundColor3 = Theme.Colors.Teal,
-		BorderSizePixel = 0,
-		ZIndex = 11,
-		Parent = header,
-	}, { UIKit.Gradient(Color3.fromRGB(205, 225, 232), Color3.fromRGB(170, 200, 210)) })
+	}, {
+		UIKit.Corner(14),
+		UIKit.Stroke(Theme.Colors.Ink, 3, 0),
+		UIKit.new("UIGradient", {
+			Rotation = 90,
+			Color = ColorSequence.new({
+				ColorSequenceKeypoint.new(0, Color3.fromHex("#5DEBDB")),
+				ColorSequenceKeypoint.new(0.85, Theme.Colors.Teal),
+				ColorSequenceKeypoint.new(0.86, Color3.fromHex("#0E7480")),
+				ColorSequenceKeypoint.new(1, Color3.fromHex("#0E7480")),
+			}),
+		}),
+	})
 
 	local titleLabel = UIKit.Text({
 		Name = "Title",
@@ -477,7 +536,7 @@ function UIKit.Window(name: string, title: string, size: Vector2): Window
 		ZIndex = 12,
 		Parent = header,
 	})
-	UIKit.TextStroke(0.3).Parent = titleLabel
+	UIKit.TextStroke(0, 2.5).Parent = titleLabel
 
 	local window = {
 		Name = name,
@@ -492,7 +551,7 @@ function UIKit.Window(name: string, title: string, size: Vector2): Window
 		window:Close()
 	end, {
 		Size = UDim2.fromOffset(40, 40),
-		Position = UDim2.new(1, -48, 0, 6),
+		Position = UDim2.new(1, -44, 0, 4),
 		TextSize = 22,
 		ZIndex = 13,
 		Parent = header,
@@ -632,7 +691,7 @@ function UIKit.Confirm(title: string, message: string, options: { { Text: string
 		BackgroundColor3 = Theme.Colors.Panel,
 		ZIndex = 51,
 		Parent = blocker,
-	}, { UIKit.Corner(16), UIKit.Stroke(Theme.Colors.Gold, 3, 0.3), UIKit.Padding(18), UIKit.List(nil, 10, Enum.HorizontalAlignment.Center) })
+	}, { UIKit.Corner(22), UIKit.Stroke(Theme.Colors.Ink, 4, 0), UIKit.Padding(18), UIKit.List(nil, 10, Enum.HorizontalAlignment.Center) })
 	UIKit.AddScale(dialog)
 	UIKit.Text({ Text = title, Font = Theme.Fonts.Title, TextSize = 24, Size = UDim2.new(1, 0, 0, 30), TextXAlignment = Enum.TextXAlignment.Center, ZIndex = 52, LayoutOrder = 1, Parent = dialog })
 	UIKit.Text({ Text = message, TextSize = 16, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, TextColor3 = Theme.Colors.SubText, TextXAlignment = Enum.TextXAlignment.Center, ZIndex = 52, LayoutOrder = 2, Parent = dialog })
