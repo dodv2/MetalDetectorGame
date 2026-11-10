@@ -584,7 +584,7 @@ function Detector:Start()
 		end
 	end)
 
-	RunService.RenderStepped:Connect(function(dt)
+	RunService.PreRender:Connect(function(dt)
 		self:RenderStep(dt)
 	end)
 	-- refresh the text readout (direction words follow the camera)

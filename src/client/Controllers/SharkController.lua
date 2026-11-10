@@ -256,7 +256,7 @@ function SharkUI:Start()
 		register(config)
 	end
 	folder.ChildAdded:Connect(register)
-	RunService.RenderStepped:Connect(function(dt)
+	RunService.PreRender:Connect(function(dt)
 		self:Animate(math.min(dt, 0.1))
 	end)
 end

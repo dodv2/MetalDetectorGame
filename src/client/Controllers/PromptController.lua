@@ -324,7 +324,7 @@ function PromptUI:Start()
 	end)
 
 	-- idle animation: turning dots, a gentle bob and the ribbon shimmer
-	game:GetService("RunService").RenderStepped:Connect(function()
+	game:GetService("RunService").PreRender:Connect(function()
 		local reduced = controllers.Effects:Reduced()
 		local t = os.clock()
 		for _, entry in shown do

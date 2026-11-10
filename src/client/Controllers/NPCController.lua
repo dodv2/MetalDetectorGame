@@ -384,7 +384,7 @@ function NPC:Start()
 			self:Close()
 		end
 	end)
-	RunService.RenderStepped:Connect(function(dt)
+	RunService.PreRender:Connect(function(dt)
 		self:Animate(dt)
 		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
 		if talkingTo then

@@ -127,7 +127,7 @@ function Reveal:WorldEffect(payload)
 	else
 		local t0 = os.clock()
 		local connection
-		connection = RunService.RenderStepped:Connect(function()
+		connection = RunService.PreRender:Connect(function()
 			local elapsed = os.clock() - t0
 			if not model.Parent then
 				connection:Disconnect()

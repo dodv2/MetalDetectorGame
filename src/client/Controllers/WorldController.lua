@@ -508,7 +508,7 @@ function World:Start()
 		end
 	end)
 
-	RunService.RenderStepped:Connect(function(dt)
+	RunService.PreRender:Connect(function(dt)
 		local data = controllers.State.Data
 		if data and data.Settings.ReducedMotion then
 			return

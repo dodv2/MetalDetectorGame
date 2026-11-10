@@ -203,7 +203,8 @@ end
 
 -- Bouncy scale pop on any GuiObject (adds a UIScale the first time)
 function Effects:Pop(object: GuiObject, scale: number?)
-	local uiScale = object:FindFirstChild("PopScale") :: UIScale?
+	-- reuse a UIKit slab's "Pop" scale: an object only honours one UIScale
+	local uiScale = (object:FindFirstChild("Pop") or object:FindFirstChild("PopScale")) :: UIScale?
 	if not uiScale then
 		local created = Instance.new("UIScale")
 		created.Name = "PopScale"

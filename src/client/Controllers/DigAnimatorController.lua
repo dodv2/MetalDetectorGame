@@ -594,7 +594,8 @@ function DigAnimator:Start()
 	bitsFolder.Parent = Workspace
 	RunService.Heartbeat:Connect(updateBits)
 
-	RunService.Stepped:Connect(function(_, dt)
+	-- PreSimulation runs after the Animator writes joints, so our Transform blend stacks on top (vault: Procedural Animation)
+	RunService.PreSimulation:Connect(function(dt)
 		step(math.min(dt, 0.1))
 	end)
 end

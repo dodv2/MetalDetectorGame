@@ -1169,7 +1169,7 @@ function Dig:Start()
 		self:WatchTools(character)
 	end)
 
-	RunService.RenderStepped:Connect(function(dt)
+	RunService.PreRender:Connect(function(dt)
 		self:RenderStep(dt)
 	end)
 end

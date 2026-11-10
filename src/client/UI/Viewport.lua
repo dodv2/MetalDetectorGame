@@ -47,7 +47,7 @@ function Viewport.Create(treasureId: string, options: Options?): ViewportFrame
 	return frame
 end
 
-RunService.RenderStepped:Connect(function(dt)
+RunService.PreRender:Connect(function(dt)
 	for frame, model in spinning do
 		if frame.Parent and frame.Visible then
 			model:PivotTo(model:GetPivot() * CFrame.Angles(0, dt * 1.2, 0))
